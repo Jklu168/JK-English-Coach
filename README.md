@@ -1,60 +1,113 @@
 # JK English Coach
 
-JK English Coach is a personal AI-assisted English vocabulary learning system.
+**Version:** v5.1.0  
+**Release:** Foundation Release
 
-It combines:
-
-- Spaced Repetition
-- SQLite progress tracking
-- Audio Cache
-- AI-assisted development
-
-to help users build a sustainable daily English learning habit.
-
-**Learn smarter. Improve every day.**
+JK English Coach is an AI-assisted English vocabulary learning system with offline Piper TTS support. It is designed as a practical desktop learning tool with local data storage, cached audio playback, and a spaced repetition workflow.
 
 ## Features
 
-- Review Today mode
-- New Words mode
-- Random by Difficulty mode
-- Again / Good / Easy spaced repetition
-- SQLite learning progress
-- Daily learning statistics
-- Audio cache playback
-- Dashboard
-- Keyboard shortcuts
+- Spaced repetition learning workflow
+- Offline Piper TTS support
+- gTTS compatibility mode
+- Review Today dashboard
+- Session delay setting
+- Session repeat count setting
+- Keyboard shortcut support
+- Mouse button interaction
+- SQLite learning progress tracking
+- Fully offline learning experience
+- Audio cache support
+- AI-assisted project development workflow
 
-## Project History
+## Project Structure
 
-This project was originally developed as Ed5k, an English 5000-word learning tool created by JK.
-Starting from v5.0.0, it is officially renamed to JK English Coach.
+```text
+JK English Coach
+|
++-- src/                # Main application source code
++-- tools/              # Utility scripts
++-- data/               # Vocabulary CSV and SQLite database
++-- audio_cache/        # Offline audio library
++-- models/             # Piper TTS models
++-- prompts/            # AI prompts and templates
++-- logs/               # Runtime logs
++-- backup/             # Backup files
++-- exports/            # Exported files
++-- Archive/            # Legacy versions and history
+|
++-- README.md
++-- CHANGELOG.md
++-- TODO.md
++-- requirements.txt
++-- .gitignore
++-- .gitattributes
+```
 
-## Run
+## Installation
 
 ```bash
+git clone <repository-url>
+cd "JK English Coach"
 pip install -r requirements.txt
 python src/main.py
 ```
 
-## Audio Cache
+## Dependencies
 
-JK English Coach uses local Piper WAV audio cache by default.
-Existing MP3 cache files are still supported.
-gTTS is kept only as fallback because bulk generation may hit HTTP 429 rate limits.
+- Python 3.11+
+- pygame
+- sqlite3
+- Piper TTS
 
-To generate audio files:
+## Audio Engine
+
+**Primary TTS:** Offline Piper TTS  
+**Compatibility:** gTTS MP3  
+**Audio Library:** 4314 words
+
+JK English Coach uses local Piper audio cache files for offline playback. Existing gTTS MP3 files remain supported for compatibility.
+
+Utility scripts:
 
 ```bash
 python tools/generate_audio.py
-```
-
-To verify audio cache:
-
-```bash
 python tools/verify_audio_cache.py
 ```
 
-## Folder Notes
+## Usage
 
-Archive contains historical scripts, prompts, databases, and releases for reference only.
+Start the application:
+
+```bash
+python src/main.py
+```
+
+The application opens a pygame window for mode selection and learning sessions. Learning progress is stored locally in SQLite.
+
+## Version History
+
+### v5.1.0
+
+- Foundation Release
+- Offline Piper TTS
+- Session Settings
+- Mouse Support
+- Git Integration
+
+### v5.0.0
+
+- Rename Ed5k to JK English Coach
+
+## Roadmap
+
+- Favorite Words
+- AI Examples
+- Sentence Mode
+- Shadowing Mode
+- AI Quiz
+- Search Function
+
+## License
+
+MIT License
