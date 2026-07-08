@@ -5,6 +5,23 @@
 
 JK English Coach is an AI-assisted English vocabulary learning system with offline Piper TTS support. It is designed as a practical desktop learning tool with local data storage, cached audio playback, and a spaced repetition workflow.
 
+## Screenshot
+
+![JK English Coach Main Screen](docs/main_screen_v5_1_0.png)
+
+Main menu of JK English Coach v5.1.0 Foundation Release.
+
+Features shown in this screen:
+
+- Review Today mode
+- New Words mode
+- Random by Difficulty mode
+- Learning statistics dashboard
+- Audio cache status
+- Session delay setting
+- Session repeat setting
+- Keyboard shortcut hints
+
 ## Features
 
 - Spaced repetition learning workflow
