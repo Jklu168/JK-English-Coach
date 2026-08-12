@@ -23,11 +23,16 @@ import sqlite3
 from pathlib import Path
 
 import pygame
-from tts_engine import existing_audio_path_for_word
+from tts_engine import (
+    GTTS_AUDIO_CACHE_DIR,
+    existing_audio_path_for_word,
+    existing_piper_audio_path_for_word,
+    gtts_audio_path_for_word,
+)
 
 
 APP_NAME = "JK English Coach"
-APP_VERSION = "v5.1.0"
+APP_VERSION = "v5.2.0"
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
@@ -296,7 +301,18 @@ def get_dashboard_stats(conn):
     ).fetchone()
     daily = conn.execute("SELECT * FROM daily_stats WHERE date=?", (today_text(),)).fetchone()
     words = [r[0] for r in conn.execute("SELECT english FROM words").fetchall()]
-    audio_ok = sum(1 for w in words if existing_audio_path_for_word(w, AUDIO_CACHE_DIR))
+    gtts_ok = sum(
+        1
+        for word in words
+        if (path := gtts_audio_path_for_word(word, GTTS_AUDIO_CACHE_DIR)).exists()
+        and path.stat().st_size > 0
+    )
+    piper_ok = sum(1 for word in words if existing_piper_audio_path_for_word(word, AUDIO_CACHE_DIR))
+    audio_ok = sum(
+        1
+        for word in words
+        if existing_audio_path_for_word(word, AUDIO_CACHE_DIR, GTTS_AUDIO_CACHE_DIR)
+    )
     return {
         "total_count": int(row["total"] or 0),
         "learned_count": int(row["learned"] or 0),
@@ -310,6 +326,8 @@ def get_dashboard_stats(conn):
         "audio_total": len(words),
         "audio_missing": max(0, len(words) - audio_ok),
         "audio_percent": int(audio_ok / len(words) * 100) if words else 0,
+        "gtts_existing": gtts_ok,
+        "piper_existing": piper_ok,
     }
 
 
@@ -375,7 +393,7 @@ async def speak_word_task(word, play_id, repeat_count):
         log_error("audio missing", RuntimeError(f"{word['english']}; run python tools/generate_audio.py"))
         return
     try:
-        TTS_STATUS = "Cache"
+        TTS_STATUS = "gTTS" if path.parent == GTTS_AUDIO_CACHE_DIR else "Piper"
         for _ in range(repeat_count):
             if play_id != current_play_id:
                 return
@@ -427,7 +445,8 @@ def draw_mode(state, dashboard, settings, note=""):
         "",
         f"Today due: {dashboard['due_count']}   New: {dashboard['new_count']}   Learned: {dashboard['learned_count']}",
         f"Remaining: {dashboard['remaining_count']}   Total: {dashboard['total_count']}",
-        f"Audio Cache: {dashboard['audio_existing']} / {dashboard['audio_total']} ({dashboard['audio_percent']}%)",
+        f"Audio: gTTS {dashboard['gtts_existing']} / {dashboard['audio_total']}   Piper {dashboard['piper_existing']} / {dashboard['audio_total']}",
+        "Primary: gTTS   Fallback: Piper",
         "Ctrl+D: Dashboard | Esc: Exit",
     ]
     for line in lines:
@@ -470,7 +489,8 @@ def draw_dashboard(state, dashboard):
         f"Remaining: {dashboard['remaining_count']}",
         f"Today reviewed: {dashboard['today_reviewed']}",
         f"Today duration: {fmt(dashboard['today_duration'])}",
-        f"Audio Cache: {dashboard['audio_existing']} / {dashboard['audio_total']} ({dashboard['audio_percent']}%)",
+        f"Audio: gTTS {dashboard['gtts_existing']} / {dashboard['audio_total']}   Piper {dashboard['piper_existing']} / {dashboard['audio_total']}",
+        "Primary: gTTS   Fallback: Piper",
         "Press any key or mouse to return",
     ]:
         draw_center(s, state.f_mid, line, RED if line.startswith("Press") else TEXT, (state.win_w / 2, y))

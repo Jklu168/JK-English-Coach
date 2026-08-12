@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v5.2.0 - 2026-08-11
+
+### Changed
+
+- Changed playback priority to gTTS MP3 first, then Piper WAV, then Piper MP3.
+- Added shared Windows-safe gTTS filename handling for download and playback lookup.
+- Updated audio status and verification output to report gTTS and Piper independently.
+- Retained both complete audio libraries; gTTS provides preferred pronunciation quality and Piper remains the fully offline fallback.
+
 ## v5.0.1 - 2026-07-01
 
 ### Changed

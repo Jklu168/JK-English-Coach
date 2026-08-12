@@ -1,9 +1,9 @@
 # JK English Coach
 
-**Version:** v5.1.0  
-**Release:** Foundation Release
+**Version:** v5.2.0  
+**Release:** gTTS Primary / Piper Fallback
 
-JK English Coach is an AI-assisted English vocabulary learning system with offline Piper TTS support. It is designed as a practical desktop learning tool with local data storage, cached audio playback, and a spaced repetition workflow.
+JK English Coach is an AI-assisted English vocabulary learning system with gTTS primary playback and offline Piper fallback. It is designed as a practical desktop learning tool with local data storage, cached audio playback, and a spaced repetition workflow.
 
 ## Screenshot
 
@@ -25,8 +25,8 @@ Features shown in this screen:
 ## Features
 
 - Spaced repetition learning workflow
-- Offline Piper TTS support
-- gTTS compatibility mode
+- gTTS MP3 primary playback
+- Offline Piper TTS fallback
 - Review Today dashboard
 - Session delay setting
 - Session repeat count setting
@@ -46,6 +46,7 @@ JK English Coach
 +-- tools/              # Utility scripts
 +-- data/               # Vocabulary CSV and SQLite database
 +-- audio_cache/        # Offline audio library
++-- audio_cache_gtts/   # Preferred gTTS MP3 library
 +-- models/             # Piper TTS models
 +-- prompts/            # AI prompts and templates
 +-- logs/               # Runtime logs
@@ -79,11 +80,11 @@ python src/main.py
 
 ## Audio Engine
 
-**Primary TTS:** Offline Piper TTS  
-**Compatibility:** gTTS MP3  
-**Audio Library:** 4314 words
+**Primary playback:** gTTS MP3  
+**Fallback playback:** Offline Piper TTS  
+**Audio libraries:** 4314 words each
 
-JK English Coach uses local Piper audio cache files for offline playback. Existing gTTS MP3 files remain supported for compatibility.
+Both complete audio libraries are retained. gTTS provides the preferred pronunciation quality, while Piper provides a fully offline fallback without network dependency.
 
 Utility scripts:
 
@@ -103,6 +104,12 @@ python src/main.py
 The application opens a pygame window for mode selection and learning sessions. Learning progress is stored locally in SQLite.
 
 ## Version History
+
+### v5.2.0
+
+- gTTS MP3 is now the primary playback source
+- Offline Piper WAV/MP3 remains the fallback
+- Both complete audio libraries are retained
 
 ### v5.1.0
 

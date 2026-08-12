@@ -11,7 +11,16 @@ SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
     sys.path.insert(0, str(SRC_DIR))
 
-from tts_engine import AUDIO_CACHE_DIR, audio_mp3_path_for_word, audio_wav_path_for_word, get_tts_engine, log_audio_build, preferred_audio_path_for_word
+from tts_engine import (
+    AUDIO_CACHE_DIR,
+    GTTS_AUDIO_CACHE_DIR,
+    audio_mp3_path_for_word,
+    audio_wav_path_for_word,
+    get_tts_engine,
+    gtts_audio_path_for_word,
+    log_audio_build,
+    preferred_audio_path_for_word,
+)
 
 CSV_PATH = PROJECT_ROOT / "data" / "Ed5k_final_optimized.csv"
 DB_PATH = PROJECT_ROOT / "data" / "jk_english.db"
@@ -46,32 +55,41 @@ def main():
     parser = argparse.ArgumentParser(description="Verify JK English Coach audio cache.")
     parser.add_argument("--repair", action="store_true")
     args = parser.parse_args()
-    AUDIO_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     pygame.init()
     pygame.mixer.init()
     words = load_words()
-    wav_existing = 0
-    mp3_existing = 0
-    any_existing = 0
-    missing, corrupted = [], []
+    gtts_existing = 0
+    piper_existing = 0
+    playback_coverage = 0
+    gtts_missing, gtts_corrupt = [], []
+    piper_missing, piper_corrupt = [], []
     for word in words:
+        gtts_path = gtts_audio_path_for_word(word, GTTS_AUDIO_CACHE_DIR)
         wav_path = audio_wav_path_for_word(word)
         mp3_path = audio_mp3_path_for_word(word)
+        gtts_ok = gtts_path.exists() and gtts_path.stat().st_size > 0 and playable(gtts_path)
         wav_ok = wav_path.exists() and wav_path.stat().st_size > 0 and playable(wav_path)
         mp3_ok = mp3_path.exists() and mp3_path.stat().st_size > 0 and playable(mp3_path)
-        if wav_ok:
-            wav_existing += 1
-        if mp3_ok:
-            mp3_existing += 1
-        if wav_ok or mp3_ok:
-            any_existing += 1
-        elif not wav_path.exists() and not mp3_path.exists():
-            missing.append(word)
+
+        if gtts_ok:
+            gtts_existing += 1
+        elif not gtts_path.exists():
+            gtts_missing.append(word)
         else:
-            corrupted.append(word)
+            gtts_corrupt.append(word)
+
+        if wav_ok or mp3_ok:
+            piper_existing += 1
+        elif not wav_path.exists() and not mp3_path.exists():
+            piper_missing.append(word)
+        else:
+            piper_corrupt.append(word)
+
+        if gtts_ok or wav_ok or mp3_ok:
+            playback_coverage += 1
     if args.repair:
         engine = get_tts_engine()
-        for word in missing + corrupted:
+        for word in piper_missing + piper_corrupt:
             try:
                 path = preferred_audio_path_for_word(word, engine.name)
                 if path.exists():
@@ -80,18 +98,17 @@ def main():
             except Exception as exc:
                 log_audio_build(f"{word}\nrepair failed: {type(exc).__name__}: {exc}")
     pygame.quit()
-    print("Total words:")
-    print(len(words))
-    print("\nWAV existing:")
-    print(wav_existing)
-    print("\nMP3 existing:")
-    print(mp3_existing)
-    print("\nAny audio existing:")
-    print(any_existing)
-    print("\nMissing audio:")
-    print(len(missing))
-    print("\nCorrupted audio:")
-    print(len(corrupted))
+    print(f"Total words : {len(words)}")
+    print("\ngTTS:")
+    print(f"Existing : {gtts_existing}")
+    print(f"Missing  : {len(gtts_missing)}")
+    print(f"Corrupt  : {len(gtts_corrupt)}")
+    print("\nPiper:")
+    print(f"Existing : {piper_existing}")
+    print(f"Missing  : {len(piper_missing)}")
+    print(f"Corrupt  : {len(piper_corrupt)}")
+    print("\nPlayback coverage:")
+    print(f"{playback_coverage} / {len(words)}")
 
 
 if __name__ == "__main__":

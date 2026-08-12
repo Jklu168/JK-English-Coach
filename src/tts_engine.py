@@ -8,10 +8,13 @@ from pathlib import Path
 
 from gtts import gTTS
 
+from audio_utils import safe_filename
+
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SCRIPT_DIR.parent
 AUDIO_CACHE_DIR = PROJECT_ROOT / "audio_cache"
+GTTS_AUDIO_CACHE_DIR = PROJECT_ROOT / "audio_cache_gtts"
 LOG_DIR = PROJECT_ROOT / "logs"
 AUDIO_BUILD_LOG_PATH = LOG_DIR / "audio_build.log"
 LOCAL_PIPER_EXE = PROJECT_ROOT / "tools" / "piper" / "piper.exe"
@@ -35,11 +38,15 @@ def audio_mp3_path_for_word(word, audio_dir=AUDIO_CACHE_DIR):
     return Path(audio_dir) / f"{safe_audio_stem(word)}.mp3"
 
 
+def gtts_audio_path_for_word(word, audio_dir=GTTS_AUDIO_CACHE_DIR):
+    return Path(audio_dir) / f"{safe_filename(word)}.mp3"
+
+
 def preferred_audio_path_for_word(word, engine_name="piper", audio_dir=AUDIO_CACHE_DIR):
     return audio_wav_path_for_word(word, audio_dir) if (engine_name or "").lower() == "piper" else audio_mp3_path_for_word(word, audio_dir)
 
 
-def existing_audio_path_for_word(word, audio_dir=AUDIO_CACHE_DIR):
+def existing_piper_audio_path_for_word(word, audio_dir=AUDIO_CACHE_DIR):
     wav_path = audio_wav_path_for_word(word, audio_dir)
     if wav_path.exists() and wav_path.stat().st_size > 0:
         return wav_path
@@ -47,6 +54,13 @@ def existing_audio_path_for_word(word, audio_dir=AUDIO_CACHE_DIR):
     if mp3_path.exists() and mp3_path.stat().st_size > 0:
         return mp3_path
     return None
+
+
+def existing_audio_path_for_word(word, audio_dir=AUDIO_CACHE_DIR, gtts_dir=GTTS_AUDIO_CACHE_DIR):
+    gtts_path = gtts_audio_path_for_word(word, gtts_dir)
+    if gtts_path.exists() and gtts_path.stat().st_size > 0:
+        return gtts_path
+    return existing_piper_audio_path_for_word(word, audio_dir)
 
 
 def audio_path_for_word(word, audio_dir=AUDIO_CACHE_DIR):
