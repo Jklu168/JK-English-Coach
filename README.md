@@ -32,6 +32,8 @@ Features shown in this screen:
 - Session repeat count setting
 - Keyboard shortcut support
 - Mouse button interaction
+- Responsive UI scaling based on both window width and height
+- Larger bold learning words that remain proportionally positioned during resize
 - SQLite learning progress tracking
 - Fully offline learning experience
 - Audio cache support
@@ -60,6 +62,21 @@ JK English Coach
 +-- requirements.txt
 +-- .gitignore
 +-- .gitattributes
+```
+
+## Windows Filesystem Path Handling
+
+- Treat every Windows filesystem path as a literal path, not as Markdown syntax.
+- Do not escape underscores inside paths. For example, `jacky_lu` must never become `jacky\_lu`.
+- Compare the actual filesystem paths, not Markdown-escaped representations of those paths.
+- Never infer a filesystem error from text formatting alone.
+- Before reporting that a path does not exist, differs from another path, or needs correction, verify the literal path against the filesystem.
+- Display Windows paths with inline code or fenced code blocks whenever practical so Markdown escaping cannot alter the path.
+
+Example:
+
+```text
+C:\Users\jacky_lu\iCloudDrive\Obsidian\JKOS\20 Projects\JK English Coach
 ```
 
 ## Installation
@@ -102,6 +119,8 @@ python src/main.py
 ```
 
 The application opens a pygame window for mode selection and learning sessions. Learning progress is stored locally in SQLite.
+
+The interface scales typography using the smaller of the window's width and height ratios. This keeps text and controls balanced in wide, tall, small, and large windows. The active English word uses a dedicated bold font and remains centered at a relative position as the window is resized.
 
 ## Version History
 

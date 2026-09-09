@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Unreleased
+
+### Changed
+
+- Standardized Windows filesystem path handling across the project README and Codex directive: paths are literal, underscores are never Markdown-escaped, path comparisons use verified filesystem values, and formatting alone cannot establish a path error.
+- Increased the learning word font by about 29% and made it bold without changing other UI typography.
+- Made responsive font scaling consider both window width and height, with readable minimum and bounded maximum sizes.
+- Kept the learning word centered at a relative window position during resize.
+- Kept all learning controls within the supported minimum window width.
+
 ## v5.2.0 - 2026-08-11
 
 ### Changed

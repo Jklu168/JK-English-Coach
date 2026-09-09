@@ -85,22 +85,23 @@ class AppState:
         self.update_fonts()
 
     def update_fonts(self):
-        ratio = max(0.78, min(1.55, self.win_w / BASE_W))
+        ratio = max(0.78, min(1.55, min(self.win_w / BASE_W, self.win_h / BASE_H)))
         self.ratio = ratio
         self.f_title = self.font(32 * ratio)
         self.f_large = self.font(56 * ratio)
+        self.f_word = self.font(72 * ratio, bold=True)
         self.f_mid = self.font(25 * ratio)
         self.f_small = self.font(17 * ratio)
         self.f_btn = self.font(15 * ratio)
         self.f_tiny = self.font(13 * ratio)
 
     @staticmethod
-    def font(size):
+    def font(size, bold=False):
         for name in ["Microsoft JhengHei", "Microsoft YaHei", "msjh", "msyh", "Arial Unicode MS"]:
-            font = pygame.font.SysFont(name, int(size))
+            font = pygame.font.SysFont(name, int(size), bold=bold)
             if font:
                 return font
-        return pygame.font.SysFont(None, int(size))
+        return pygame.font.SysFont(None, int(size), bold=bold)
 
 
 def now_iso():
@@ -349,6 +350,10 @@ def draw_center(screen, font, text, color, center):
     screen.blit(surf, surf.get_rect(center=center))
 
 
+def learning_word_center(state):
+    return state.win_w / 2, state.win_h * 0.30
+
+
 def draw_button(screen, font, rect, text):
     pygame.draw.rect(screen, BTN_BG, rect, border_radius=4)
     pygame.draw.rect(screen, BTN_BORDER, rect, 1, border_radius=4)
@@ -419,7 +424,10 @@ def replay(word, settings):
 
 def build_buttons(state):
     names = ["pause", "replay", "again", "good", "easy", "learned", "exit"]
-    bw, bh, gap = max(72, int(82 * state.ratio)), max(32, int(36 * state.ratio)), 8
+    gap = max(4, int(8 * state.ratio))
+    available_width = state.win_w - 24 - (len(names) - 1) * gap
+    bw = max(64, min(int(82 * state.ratio), available_width // len(names)))
+    bh = max(32, int(36 * state.ratio))
     x = (state.win_w - len(names) * bw - (len(names) - 1) * gap) // 2
     y = int(state.win_h - 54 * state.ratio)
     return {name: pygame.Rect(x + i * (bw + gap), y, bw, bh) for i, name in enumerate(names)}
@@ -506,7 +514,7 @@ def draw_learning(state, word, idx, total, mode, paused, runtime, stats, buttons
     s.blit(state.f_btn.render(f"Again/Good/Easy: {stats['again_count']}/{stats['good_count']}/{stats['easy_count']}", True, MUTED), (16, 56))
     s.blit(state.f_btn.render(f"Progress: {idx+1}/{total}", True, MUTED), (state.win_w - 210, 12))
     s.blit(state.f_btn.render(f"Time: {fmt(runtime)}", True, MUTED), (state.win_w - 210, 34))
-    draw_center(s, state.f_large, word["english"], WORD_BLUE, (state.win_w / 2, state.win_h * 0.30))
+    draw_center(s, state.f_word, word["english"], WORD_BLUE, learning_word_center(state))
     for i, line in enumerate(wrap_text(f"{word['pos']}: {word['chinese']}", state.f_mid, state.win_w * 0.9)[:3]):
         draw_center(s, state.f_mid, line, TEXT, (state.win_w / 2, state.win_h * 0.49 + i * 34 * state.ratio))
     detail = f"review_count: {word['review_count']} | wrong_count: {word['wrong_count']} | next_review: {word['next_review'] or '-'} | TTS: {TTS_STATUS}"
